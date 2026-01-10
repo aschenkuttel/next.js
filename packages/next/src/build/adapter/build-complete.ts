@@ -581,6 +581,7 @@ export async function handleBuildComplete({
           }
         }
       }
+      console.log('after route modules')
 
       // These are modules that are necessary for bootstrapping node env
       const necessaryNodeDependencies = [
@@ -1223,6 +1224,12 @@ export async function handleBuildComplete({
         const isAppPage =
           Boolean(appOutputMap[srcRoute]) || srcRoute === '/_not-found'
 
+        // if we already have 404.html favor that instead of
+        // _not-found prerender
+        if (srcRoute === '/_not-found' && hasStatic404) {
+          continue
+        }
+
         const isNotFoundTrue = prerenderManifest.notFoundRoutes.includes(route)
 
         let allowQuery: string[] | undefined
@@ -1312,7 +1319,10 @@ export async function handleBuildComplete({
             allowQuery,
             allowHeader,
             renderingMode,
-            bypassFor: experimentalBypassFor,
+            bypassFor:
+              isAppPage && srcRoute !== '/_not-found'
+                ? experimentalBypassFor
+                : undefined,
             bypassToken: prerenderManifest.preview.previewModeId,
           },
         }
