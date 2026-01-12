@@ -64,6 +64,31 @@ describe('cache-components', () => {
     }
   })
 
+  it('should handle notFound() in Suspense boundary without connection error', async () => {
+    // This test reproduces issue #86251 where notFound() inside a Suspense boundary
+    // with cacheComponents causes "Connection closed" errors instead of rendering
+    // the not-found page properly.
+    const browser = await next.browser('/cases/not-found-suspense')
+
+    // The not-found page should render properly - this is the key assertion.
+    // Before the fix, this would fail with "Connection closed" error.
+    expect(await browser.elementById('not-found-message').text()).toBe(
+      'This is the not-found page rendered inside a Suspense boundary.'
+    )
+
+    // The layout sentinel should be present (always rendered)
+    expect(await browser.elementById('layout').text()).toMatch(
+      /at (runtime|buildtime)/
+    )
+
+    // The not-found sentinel should be present and rendered at runtime.
+    // Since notFound() is triggered asynchronously via Suspense, the not-found
+    // page is rendered at runtime even in production builds.
+    expect(await browser.elementById('not-found-sentinel').text()).toBe(
+      'at runtime'
+    )
+  })
+
   it('should prerender pages that render in a microtask', async () => {
     let $ = await next.render$('/cases/microtask', {})
     if (isNextDev) {
