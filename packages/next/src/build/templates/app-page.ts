@@ -71,18 +71,13 @@ import { parseMaxPostponedStateSize } from '../../shared/lib/size-limit'
  */
 declare const tree: LoaderTree
 
-// We inject the tree and pages here so that we can use them in the route
-// module.
-// INJECT:tree
-
-import GlobalError from 'VAR_MODULE_GLOBAL_ERROR' with { 'turbopack-transition': 'next-server-utility' }
-
-export { GlobalError }
-
 // These are injected by the loader afterwards.
 declare const __next_app_require__: (id: string | number) => unknown
 declare const __next_app_load_chunk__: (id: string | number) => Promise<unknown>
 
+// We inject the tree and pages here so that we can use them in the route
+// module.
+// INJECT:tree
 // INJECT:__next_app_require__
 // INJECT:__next_app_load_chunk__
 
@@ -399,7 +394,6 @@ export async function handler(
   const ComponentMod = {
     ...entryBase,
     tree,
-    GlobalError,
     handler,
     routeModule,
     __next_app__,
